@@ -5,7 +5,8 @@
   "scripts": {
     "server": "nodemon server/app.js",
     "app": "vite --config vite.config.js",
-    "dev": "concurrently \"npm run server\" \"npm run app\""
+    "dev": "concurrently \"npm run server\" \"npm run app\"",
+    "migrate": "sequelize-cli db:migrate --config config/config.js"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.3",
