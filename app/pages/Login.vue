@@ -22,7 +22,7 @@
         
         <div class="footer-links">
           <span>계정이 없으신가요?</span>
-          <a href="#">회원가입</a>
+          <router-link to="/join">회원가입</router-link>
         </div>
       </div>
     </div>

@@ -1,6 +1,8 @@
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
+const authRouter = require('./routers/auth');
+const { sequelize } = require('./models');
 
 const app = express();
 const PORT = 3000;
@@ -9,6 +11,12 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, '../app/dist')));
+
+sequelize.sync({ force: false }) // 반드시 false
+  .then(() => console.log('DB connection success'))
+  .catch(err => console.error('DB connection error:', err));
+
+app.use('/api/auth', authRouter);
 
 app.listen(PORT, () => {
     console.log("Start Server");
