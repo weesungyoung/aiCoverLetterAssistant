@@ -1,0 +1,21 @@
+{
+  "name": "aicoverletterassistant",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "server": "nodemon server/app.js",
+    "app": "vite app",
+    "dev": "concurrently \"npm run server\" \"npm run app\""
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.3",
+    "concurrently": "^9.2.1",
+    "nodemon": "^3.1.11",
+    "vite": "^7.3.1"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.2.1",
+    "vue": "^3.5.27"
+  }
+}
