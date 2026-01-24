@@ -35,15 +35,34 @@
   const password = ref('')
   const isLoading = ref(false)
   
+  // 로그인 페이지 버튼 클릭 시 동작하는 함수
   const handleLogin = async () => {
     isLoading.value = true
     
-    // 나중에 서버와 연동할 부분입니다.
-    // 지금은 일단 성공했다고 가정하고 알림창만 띄울게요.
-    setTimeout(() => {
-      alert(`반갑습니다, ${email.value}님! 이제 자소서를 작성해 볼까요?`)
+    try {
+      // 로그인 인증 서버에 요청 전송
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email: email.value,
+          password: password.value
+        })
+      });
+      // 서버 측 응답 추출
+      const data = await res.json();
+      console.log(data);
+      if (data.success) {
+        // 메인 페이지로 리다이렉트
+        window.location.href = '/';
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
       isLoading.value = false
-    }, 1000)
+    }
   }
   </script>
   
