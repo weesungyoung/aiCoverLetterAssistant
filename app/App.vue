@@ -1,7 +1,5 @@
 <template>
   <div class="app-layout">
-    <Sidebar />
-
     <div class="page-container">
       <router-view />
     </div>
@@ -9,7 +7,23 @@
 </template>
 
 <script setup>
-import Sidebar from './components/Sidebar.vue';
+import { onMounted } from 'vue';
+import { useUserStore } from './stores/user';
+
+const userStore = useUserStore();
+
+onMounted(() => {
+  if (!userStore.user) {
+    const savedUser = localStorage.getItem('userInfo');
+    if (savedUser) {
+      try {
+        userStore.setUser(JSON.parse(savedUser));
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  }
+});
 </script>
 
 <style>

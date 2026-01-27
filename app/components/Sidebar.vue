@@ -16,8 +16,8 @@
       <div class="user-info">
         <div class="user-avatar"></div>
         <div v-if="isSidebarOpen" class="user-text">
-          <p class="user-name">홍길동</p>
-          <p class="logout-btn">로그아웃</p>
+          <p class="user-name">{{ userStore.userNickName || '사용자' }}</p>
+          <p class="logout-btn" @click="handleLogout">로그아웃</p>
         </div>
       </div>
     </div>
@@ -26,13 +26,25 @@
 
 <script setup>
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { useUserStore } from '../stores/user';
+import { deleteCookie } from '../util/cookieUtils';
 
 const isSidebarOpen = ref(true);
+const router = useRouter();
+const userStore = useUserStore();
 
 const menuItems = [
   { icon: '📝', label: '자기소개서 작성' },
   { icon: '🏠', label: '마이페이지' },
 ];
+
+const handleLogout = () => {
+  userStore.clearUser();
+  deleteCookie('accessToken');
+
+  router.push('/login');
+};
 </script>
 
 <style scoped>
@@ -139,5 +151,10 @@ const menuItems = [
   color: #adb5bd;
   margin: 0;
   cursor: pointer;
+  transition: color 0.2s;
+}
+
+.logout-btn:hover {
+  color: #495057;
 }
 </style>

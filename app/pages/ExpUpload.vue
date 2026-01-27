@@ -1,53 +1,56 @@
 <template>
-  <div class="upload-page">
-    <div class="content-body">
-      <h1 class="page-title">경험 업로드</h1>
-      
-      <div class="upload-card">
-        <div class="upload-icon-wrapper">
-          <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-            <polyline points="14 2 14 8 20 8"></polyline>
-            <line x1="12" y1="18" x2="12" y2="12"></line>
-            <polyline points="9 15 12 12 15 15"></polyline>
-          </svg>
-        </div>
+  <div class="container">
+    <Sidebar />
+    <main class="main-content">
+      <div class="content-body">
+        <h1 class="page-title">경험 업로드</h1>
         
-        <div class="text-group">
-          <p class="main-text">경험 추출을 위해 기존에 작성한 자기소개서를 첨부해주세요.</p>
-          <p class="sub-text">저장된 경험이 없을 경우 진행이 불가능합니다.</p>
+        <div class="upload-card">
+          <div class="upload-icon-wrapper">
+            <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="12" y1="18" x2="12" y2="12"></line>
+              <polyline points="9 15 12 12 15 15"></polyline>
+            </svg>
+          </div>
+          
+          <div class="text-group">
+            <p class="main-text">경험 추출을 위해 기존에 작성한 자기소개서를 첨부해주세요.</p>
+            <p class="sub-text">저장된 경험이 없을 경우 진행이 불가능합니다.</p>
+          </div>
+
+          <input 
+            type="file" 
+            ref="fileInput" 
+            @change="handleFileChange" 
+            accept=".pdf,.doc,.docx,.txt"
+            style="display: none;" 
+          />
+
+          <button class="attach-btn" @click="triggerFileInput">
+            첨부하기
+          </button>
+
+          <p class="direct-input-btn" @click="isModalOpen = true">직접 입력하기</p>
+          
+          <p v-if="fileName" class="selected-file-name">선택된 파일: {{ fileName }}</p>
         </div>
-
-        <input 
-          type="file" 
-          ref="fileInput" 
-          @change="handleFileChange" 
-          accept=".pdf,.doc,.docx,.txt"
-          style="display: none;" 
-        />
-
-        <button class="attach-btn" @click="triggerFileInput">
-          첨부하기
-        </button>
-
-        <p class="direct-input-btn" @click="isModalOpen = true">직접 입력하기</p>
-        
-        <p v-if="fileName" class="selected-file-name">선택된 파일: {{ fileName }}</p>
       </div>
-    </div>
 
-    <ExperienceModal
-      v-if="isModalOpen" 
-      @close="isModalOpen = false" 
-      @submit="handleExperienceSubmit"
-    />
+      <ExperienceModal
+        v-if="isModalOpen" 
+        @close="isModalOpen = false" 
+        @submit="handleExperienceSubmit"
+      />
+    </main>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue';
 import ExperienceModal from '../components/ExpModal.vue'; 
-
+import Sidebar from '../components/Sidebar.vue';
 const fileInput = ref(null); // input 태그에 접근하기 위한 변수
 const fileName = ref('');    // 화면에 파일명을 표시하기 위한 변수
 const isModalOpen = ref(false); // 모달 열림 상태 관리 변수
@@ -77,13 +80,21 @@ const handleExperienceSubmit = (data) => {
 </script>
 
 <style scoped>
-.upload-page {
-  width: 100%;
-  height: 100%;
+.container {
   display: flex;
+  height: 100vh;
+  width: 100vw;
+  font-family: 'Pretendard', sans-serif;
+  background-color: #ffffff;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
   justify-content: center;
   align-items: center;
-  background-color: #ffffff;
 }
 
 .content-body {

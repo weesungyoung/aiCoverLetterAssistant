@@ -28,7 +28,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import StepDraft from '../components/panel/StepDraft.vue'
+import StepDraft from '../components/Panel/StepDraft.vue'
 
 // 나중에 만들 컴포넌트들 (현재는 비워둬도 됨)
 const StepFeedback = { template: '<div class="empty-state">피드백 기능 준비 중...</div>' }

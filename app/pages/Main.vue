@@ -1,5 +1,6 @@
 <template>
   <div class="container">
+    <Sidebar />
     <main :class="['main-content', { 'expanded': !isSidebarOpen }]">
       <header class="top-header">
         <button class="help-btn">?</button>
@@ -24,11 +25,46 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router'; 
+import Sidebar from '../components/Sidebar.vue';
+import { getCookie } from '../util/cookieUtils';
+import { useUserStore } from '../stores/user';
 
 const router = useRouter();
 const jobLink = ref(''); 
+const userStore = useUserStore();
+
+onMounted(() => {
+  const token = getCookie('accessToken');
+  if (!token) {
+    router.push('/login');
+    return;
+  }
+
+  const getUserExp = async () => {
+    try {
+      const response = await fetch('/api/userExp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          email: userStore.userEmail
+        })
+      });
+      const data = await response.json();
+      if (data.userExp.length < 1) {
+        router.push('/upload');
+        return;
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+  getUserExp();
+});
 
 const startAnalysis = () => {
   if (!jobLink.value) {
