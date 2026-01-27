@@ -1,0 +1,202 @@
+<template>
+  <div class="main-wrapper">
+    <Sidebar />
+
+    <div class="editor-layout">
+      <section class="editor-left">
+        <div class="header-container">
+          <h1 class="page-title">자기소개서 작성</h1>
+          <div class="report-button-wrapper">
+            <button class="report-button" @click="openReport">📊 기업 분석 리포트</button>
+            <div class="tooltip">
+              JD 분석과 기업 기본 정보를 확인하고<br>
+              단계별로 자소서를 써보세요!
+            </div>
+          </div>
+        </div>
+        
+        <div class="question-tabs">
+          <button
+            v-for="(question, index) in questions"
+            :key="question.id"
+            class="tab-item"
+            :class="{ 'is-active': index === activeIndex }"
+            @click="setActive(index)"
+          >
+            {{ question.label }}
+          </button>
+          <button class="tab-item add-tab" @click="addQuestion">+ 추가</button>
+        </div>
+
+        <div class="question-header">
+          <span class="question-title">
+            <template v-if="isEditingTitle">
+              <input v-model="draftTitle" class="title-input" type="text" maxlength="30" @keyup.enter="toggleEditTitle" />
+            </template>
+            <template v-else>
+              {{ activeQuestion.title }}
+            </template>
+          </span>
+          <div class="question-actions">
+            <button class="action-btn" @click="toggleEditTitle">
+              {{ isEditingTitle ? '완료' : '문항 수정' }}
+            </button>
+            <span class="action-divider">|</span>
+            <button class="action-btn" @click="removeQuestion">삭제</button>
+          </div>
+        </div>
+
+        <div class="question-body">
+          <textarea
+            v-model="activeQuestion.content"
+            class="question-textarea"
+            placeholder="내용을 입력하거나 우측에서 초안을 생성해보세요."
+          ></textarea>
+        </div>
+      </section>
+
+      <Panel 
+        :active-question="activeQuestion" 
+        :materials="materials"
+        v-model:selectedMaterials="selectedMaterials"
+        @open-modal="isModalOpen = true"
+      />
+
+      <ExpModal 
+      v-if="isModalOpen" 
+      @close="isModalOpen = false" 
+      @save="handleSaveExperience"
+    />
+      <ReportModal v-if="isReportOpen" @close="isReportOpen = false" />
+
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { computed, ref } from 'vue'
+import Sidebar from '../components/Sidebar.vue'
+import Panel from './Panel.vue'
+import ExpModal from '../components/ExpModal.vue'
+import ReportModal from '../components/ReportModal.vue'
+
+// 데이터 상태 관리
+const questions = ref([
+  { id: 1, label: '문항1', title: '지원동기', content: '', draft: '', isStarted: false },
+  { id: 2, label: '문항2', title: '성격의 장단점', content: '', draft: '', isStarted: false },
+  { id: 3, label: '문항3', title: '강점', content: '', draft: '', isStarted: false },
+  { id: 4, label: '문항4', title: '입사 후 포부 및 계획', content: '', draft: '', isStarted: false }
+])
+
+const activeIndex = ref(0)
+const isEditingTitle = ref(false)
+const draftTitle = ref(questions.value[0].title)
+const selectedMaterials = ref([])
+const isModalOpen = ref(false)
+const isReportOpen = ref(false)
+
+const activeQuestion = computed(() => questions.value[activeIndex.value])
+
+const materials = ref([
+  { id: 1, title: '생성형 AI 프로젝트', description: 'AI 모델 선정 및 자동 배포 시스템 구축' },
+  { id: 2, title: '데이터 분석 교육', description: 'Python 기반 시각화 및 모델링 수행' }
+])
+
+// 함수 로직
+const setActive = (i) => { 
+  activeIndex.value = i; 
+  isEditingTitle.value = false; 
+  draftTitle.value = questions.value[i].title; 
+}
+const toggleEditTitle = () => { 
+  if (isEditingTitle.value) activeQuestion.value.title = draftTitle.value; 
+  isEditingTitle.value = !isEditingTitle.value; 
+}
+const addQuestion = () => { 
+  questions.value.push({ 
+    id: Date.now(), 
+    label: `문항${questions.value.length+1}`, 
+    title: '새 문항', 
+    content: '', 
+    draft: '',
+    isStarted: false // 새 문항도 초기값은 분석 전 상태
+  }); 
+  setActive(questions.value.length - 1); 
+}
+const removeQuestion = () => { 
+  if (questions.value.length > 1) { 
+    questions.value.splice(activeIndex.value, 1); 
+    setActive(0); 
+  } 
+}
+const openReport = () => { 
+  isReportOpen.value = true 
+}
+</script>
+
+<style scoped>
+/* 1. 레이아웃 고정 */
+.main-wrapper {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  background-color: #fff; overflow: hidden; display: flex;
+}
+
+.editor-layout { display: flex; flex: 1; height: 100%; }
+
+/* 2. 왼쪽 에디터 영역 (60%) */
+.editor-left {
+  flex: 0 0 60%;
+  display: flex; flex-direction: column;
+  padding: 40px 60px; border-right: 1px solid #f0f0f0;
+  box-sizing: border-box;
+}
+
+/* 3. 헤더 (제목 & 툴팁 버튼) */
+.header-container {
+  display: flex; justify-content: space-between; align-items: center;
+  width: 100%; margin-bottom: 8px;
+}
+
+.page-title { font-size: 24px; font-weight: 800; margin: 0; }
+
+.report-button-wrapper { position: relative; display: inline-block; }
+
+.report-button {
+  display: flex; align-items: center; gap: 8px;
+  background-color: #3b82f6; color: white; border: none;
+  padding: 10px 18px; border-radius: 8px; font-weight: 600;
+  font-size: 14px; cursor: pointer; transition: background 0.2s;
+}
+.report-button:hover { background-color: #2563eb; }
+
+.tooltip {
+  visibility: hidden; opacity: 0; position: absolute;
+  top: 110%; right: 0; width: 220px;
+  background-color: #334155; color: #fff; text-align: center;
+  padding: 10px; border-radius: 6px; font-size: 12px;
+  line-height: 1.5; z-index: 1000; transition: opacity 0.3s;
+  white-space: pre-line; pointer-events: none;
+}
+.report-button-wrapper:hover .tooltip { visibility: visible; opacity: 1; }
+
+/* 4. 문항 탭 스타일 */
+.question-tabs { display: flex; gap: 20px; margin-bottom: 20px; border-bottom: 1px solid #f0f0f0; }
+.tab-item { border: none; background: none; padding-bottom: 10px; cursor: pointer; color: #999; font-size: 15px; }
+.tab-item.is-active { color: #1d4ed8; font-weight: 700; border-bottom: 2px solid #1d4ed8; }
+.add-tab { color: #3b82f6; font-weight: 600; }
+
+/* 5. 에디터 상단 (제목 수정/삭제) */
+.question-header { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+.question-title { font-size: 18px; font-weight: 700; color: #111; }
+.title-input { border: 1px solid #3b82f6; outline: none; padding: 4px 8px; border-radius: 4px; font-size: 16px; }
+.question-actions { color: #ccc; font-size: 13px; display: flex; gap: 8px; align-items: center; }
+.action-btn { background: none; border: none; color: #999; cursor: pointer; font-size: 13px; }
+.action-btn:hover { color: #666; }
+
+/* 6. 텍스트 입력창 */
+.question-body { flex: 1; border-top: 2px solid #111; margin-top: 15px; }
+.question-textarea {
+  width: 100%; height: 100%; border: none; outline: none; resize: none;
+  font-size: 16px; padding: 20px 0; line-height: 1.8; color: #333;
+}
+</style>
