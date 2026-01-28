@@ -6,7 +6,13 @@
     </div>
 
     <nav class="menu-list">
-      <div v-for="item in menuItems" :key="item.label" class="menu-item">
+      <div 
+        v-for="item in menuItems" 
+        :key="item.id" 
+        class="menu-item"
+        :class="{ 'is-active': $route.path === item.path }"
+        @click="$router.push(item.path)"
+      >
         <span class="menu-icon">{{ item.icon }}</span>
         <span v-if="isSidebarOpen">{{ item.label }}</span>
       </div>
@@ -35,8 +41,9 @@ const router = useRouter();
 const userStore = useUserStore();
 
 const menuItems = [
-  { icon: '📝', label: '자기소개서 작성' },
-  { icon: '🏠', label: '마이페이지' },
+  { icon: '📝', label: '자기소개서 작성', path: '/' },
+  { icon: '📂', label: '경험 저장소', path: '/storage' },
+  { icon: '🏠', label: '마이페이지', path: '/mypage' },
 ];
 
 const handleLogout = () => {

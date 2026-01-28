@@ -11,30 +11,7 @@
 
       <div class="modal-body report-body">
         <div v-if="reportHtml" v-html="reportHtml"></div>
-        
-        <div v-else class="dummy-report">
-          <section class="report-section">
-            <h3>🏢 기업 개요</h3>
-            <p>본 기업은 생성형 AI 및 데이터 플랫폼 분야의 선두주자로...</p>
-          </section>
-          <section class="report-section">
-            <h3>🎯 핵심 가치 (Core Value)</h3>
-            <div class="keyword-group">
-              <span class="keyword">혁신</span>
-              <span class="keyword">도전</span>
-              <span class="keyword">고객 중심</span>
-            </div>
-          </section>
-          <section class="report-section">
-            <h3>🔍 JD 핵심 분석 (Job Description)</h3>
-            <p>해당 직무는 Python 기반의 대규모 데이터 처리 역량과 LLM 파인튜닝 경험을 최우선으로 요구함.</p>
-          </section>
-        </div>
       </div>
-
-      <footer class="modal-footer">
-        <button class="confirm-btn" @click="$emit('close')">확인</button>
-      </footer>
     </div>
   </div>
 </template>
@@ -50,14 +27,28 @@ defineEmits(['close'])
   background: rgba(0, 0, 0, 0.6); display: flex; align-items: center; justify-content: center; z-index: 9999;
 }
 .modal-content.report-size {
-  width: 800px; max-width: 90%; max-height: 85vh; background: #fff; border-radius: 20px; display: flex; flex-direction: column; overflow: hidden;
+  /* 너비와 높이를 화면의 80%로 설정 */
+  width: 80vw; 
+  height: 80vh; 
+  
+  background: #fff; 
+  border-radius: 20px; 
+  display: flex; 
+  flex-direction: column; 
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2); /* 좀 더 입체감 있는 그림자 추가 */
 }
+
 .modal-header { padding: 20px 30px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
 .header-left { display: flex; align-items: center; gap: 10px; }
 .report-icon { font-size: 24px; }
 .close-btn { background: none; border: none; font-size: 30px; cursor: pointer; color: #999; }
 
-.modal-body { padding: 30px; overflow-y: auto; flex: 1; line-height: 1.7; }
+/* 스크롤바 커스터마이징 */
+.modal-body::-webkit-scrollbar {
+  width: 8px;
+}
+
 .report-section { margin-bottom: 30px; }
 .report-section h3 { color: #1d4ed8; font-size: 18px; margin-bottom: 10px; border-left: 4px solid #1d4ed8; padding-left: 10px; }
 .keyword-group { display: flex; gap: 10px; margin-top: 10px; }

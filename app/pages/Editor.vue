@@ -56,17 +56,20 @@
       </section>
 
       <Panel 
-        :active-question="activeQuestion" 
+        v-model:currentTab="currentPanelTab"  :active-question="activeQuestion" 
         :materials="materials"
         v-model:selectedMaterials="selectedMaterials"
         @open-modal="isModalOpen = true"
+        @analyze="handleAnalyze"
+        @analyzeSubhead="handleAnalyzeSubhead"
       />
 
       <ExpModal 
-      v-if="isModalOpen" 
-      @close="isModalOpen = false" 
-      @save="handleSaveExperience"
-    />
+        v-if="isModalOpen" 
+        @close="isModalOpen = false" 
+        @save="handleSaveExperience"
+      />
+
       <ReportModal v-if="isReportOpen" @close="isReportOpen = false" />
 
     </div>
@@ -82,18 +85,19 @@ import ReportModal from '../components/ReportModal.vue'
 
 // 데이터 상태 관리
 const questions = ref([
-  { id: 1, label: '문항1', title: '지원동기', content: '', draft: '', isStarted: false },
-  { id: 2, label: '문항2', title: '성격의 장단점', content: '', draft: '', isStarted: false },
-  { id: 3, label: '문항3', title: '강점', content: '', draft: '', isStarted: false },
-  { id: 4, label: '문항4', title: '입사 후 포부 및 계획', content: '', draft: '', isStarted: false }
+  { id: 1, label: '문항1', title: '지원동기', content: '', draft: '', isStarted: false, feedback: null, subheads: null },
+  { id: 2, label: '문항2', title: '성격의 장단점', content: '', draft: '', isStarted: false, feedback: null, subheads: null },
+  { id: 3, label: '문항3', title: '강점', content: '', draft: '', isStarted: false, feedback: null, subheads: null },
+  { id: 4, label: '문항4', title: '입사 후 포부 및 계획', content: '', draft: '', isStarted: false, feedback: null, subheads: null }
 ])
 
 const activeIndex = ref(0)
+const currentPanelTab = ref('draft') // 패널의 현재 탭 상태를 부모가 관리
 const isEditingTitle = ref(false)
 const draftTitle = ref(questions.value[0].title)
 const selectedMaterials = ref([])
 const isModalOpen = ref(false)
-const isReportOpen = ref(false)
+const isReportOpen = ref(true)
 
 const activeQuestion = computed(() => questions.value[activeIndex.value])
 
@@ -102,11 +106,53 @@ const materials = ref([
   { id: 2, title: '데이터 분석 교육', description: 'Python 기반 시각화 및 모델링 수행' }
 ])
 
+// 피드백 분석 함수 (나중에 실제 API 호출로 대체)
+const handleAnalyze = async (question) => {
+  // 이미 분석 데이터가 있으면 다시 실행하지 않음
+  if (question.feedback) return;
+
+  question.isStarted = true;
+  
+  // 시뮬레이션: 1.2초 후 데이터 주입
+  await new Promise(resolve => setTimeout(resolve, 1200));
+
+  question.feedback = {
+    hr: [
+      { category: '전달력', rating: 4, tags: [], text: '문장이 간결하고 의도가 명확합니다.' },
+      { category: '문항 의도 파악', rating: 5, tags: [], text: '질문의 핵심을 정확히 파악했습니다.' },
+      { category: '조직 적합성', rating: 4, tags: ['도전정신'], text: '적극적인 태도가 돋보입니다.' }
+    ],
+    pro: [
+      { category: '직무 적합성', rating: 4, tags: ['꼼꼼함'], text: '실무 역량이 잘 드러나 있습니다.' },
+      { category: '기술 전문성', rating: 3, tags: ['Python'], text: '기술적 디테일을 조금 더 보강하세요.' },
+      { category: '문제 해결력', rating: 5, tags: ['논리력'], text: '해결 과정이 매우 논리적입니다.' }
+    ]
+  };
+};
+
+// 소제목 분석 함수 (나중에 실제 API 호출로 대체)
+const handleAnalyzeSubhead = async (question) => {
+  if (question.subheads || !question.content.trim()) return;
+
+  question.isSubheadStarted = true; // 소제목 전용 로딩 상태
+  await new Promise(resolve => setTimeout(resolve, 1500)); // 시뮬레이션
+
+  // LLM이 본문을 파악해 추천해준 컨셉의 소제목 3개
+  question.subheads = [
+    { id: 1, text: "데이터로 증명하는 분석 전문가, OO 기업의 성장을 이끌다" },
+    { id: 2, text: "협업의 가치를 아는 개발자: 15% 효율 개선을 이뤄낸 소통의 힘" },
+    { id: 3, text: "도전을 멈추지 않는 열정, 기술적 한계를 넘어선 프로젝트 경험" }
+  ];
+};
+
 // 함수 로직
 const setActive = (i) => { 
   activeIndex.value = i; 
   isEditingTitle.value = false; 
   draftTitle.value = questions.value[i].title; 
+  
+  // 문항을 누를 때마다 오른쪽 패널을 '초안 생성'으로 초기화
+  currentPanelTab.value = 'draft'; 
 }
 const toggleEditTitle = () => { 
   if (isEditingTitle.value) activeQuestion.value.title = draftTitle.value; 
@@ -129,6 +175,7 @@ const removeQuestion = () => {
     setActive(0); 
   } 
 }
+
 const openReport = () => { 
   isReportOpen.value = true 
 }

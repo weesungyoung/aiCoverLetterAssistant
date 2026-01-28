@@ -5,7 +5,7 @@
         v-for="tab in tabList" 
         :key="tab.id"
         :class="['tab-pill', { active: currentTab === tab.id }]" 
-        @click="currentTab = tab.id"
+        @click="handleTabChange(tab.id)" 
       >
         {{ tab.label }}
       </button>
@@ -29,15 +29,11 @@
 <script setup>
 import { ref } from 'vue'
 import StepDraft from '../components/Panel/StepDraft.vue'
+import StepFeedback from '../components/Panel/StepFeedback.vue'
+import StepSubhead from '../components/Panel/StepSubhead.vue'
 
-// 나중에 만들 컴포넌트들 (현재는 비워둬도 됨)
-const StepFeedback = { template: '<div class="empty-state">피드백 기능 준비 중...</div>' }
-const StepSubhead = { template: '<div class="empty-state">소제목 추천 기능 준비 중...</div>' }
-
-const props = defineProps(['activeQuestion', 'materials', 'selectedMaterials'])
-const emit = defineEmits(['open-modal', 'update:selectedMaterials'])
-
-const currentTab = ref('draft')
+const props = defineProps(['activeQuestion', 'materials', 'selectedMaterials', 'currentTab'])
+const emit = defineEmits(['open-modal', 'update:selectedMaterials', 'analyze', 'update:currentTab'])
 
 const tabList = [
   { id: 'draft', label: '초안 생성' },
@@ -49,6 +45,21 @@ const tabComponents = {
   draft: StepDraft,
   feedback: StepFeedback,
   subhead: StepSubhead
+}
+
+// 탭 변경 핸들러
+const handleTabChange = (tabId) => {
+  emit('update:currentTab', tabId)
+  
+  if (tabId === 'feedback' && props.activeQuestion) {
+    if (!props.activeQuestion.content.trim()) return alert('초안을 먼저 작성해주세요!');
+    emit('analyze', props.activeQuestion)
+  }
+  
+  if (tabId === 'subhead' && props.activeQuestion) {
+    if (!props.activeQuestion.content.trim()) return alert('초안을 먼저 작성해주세요!');
+    emit('analyzeSubhead', props.activeQuestion) // 새로운 이벤트 발생
+  }
 }
 </script>
 
