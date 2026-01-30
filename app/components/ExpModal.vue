@@ -46,7 +46,7 @@
             :disabled="!isAllReady"
             @click="$emit('submit', experiences)"
           >
-            소재 만들기
+            경험 저장하기
           </button>
         </div>
       </footer>
@@ -60,11 +60,18 @@ import { ref, computed } from 'vue';
 const emit = defineEmits(['close', 'submit']);
 
 const starLabels = {
-  situation: { title: '배경/상황', eng: 'Situation' },
-  task: { title: '역할/과제', eng: 'Task' },
-  action: { title: '행동', eng: 'Action' },
-  result: { title: '결과', eng: 'Result' },
-  insight: { title: '배운 점', eng: 'Insight' }
+  situation: { title: '배경/상황', eng: 'Situation'},
+  task: { title: '역할/과제', eng: 'Task'},
+  action: { title: '행동', eng: 'Action'},
+  result: { title: '결과', eng: 'Result'},
+  insight: { title: '배운 점', eng: 'Insight'}
+};
+
+const submitExperience = () => {
+  if (!isAllReady.value) return;
+
+  // 변환 없이 원본 데이터 배열(situation, task 등 포함)을 그대로 보냅니다.
+  emit('submit', experiences.value); 
 };
 
 const experiences = ref([
@@ -77,7 +84,6 @@ const addExperience = () => {
   });
 };
 
-// 특정 인덱스의 경험 삭제 함수
 const removeExperience = (index) => {
   experiences.value.splice(index, 1);
 };
