@@ -20,4 +20,32 @@ router.post('/userExp', async (req, res) => {
   }
 });
 
+router.post('/insertExp', async (req, res) => {
+  try {
+    const { email, data } = req.body;
+
+    if (!email) {
+      res.status(500);
+    }
+
+    if (data.experiences) {
+      for (const exp of data.experiences) {
+        await UserExp.create({
+          userEmail: email || "",
+          title: exp?.title || "",
+          keywords: exp?.keywords || [],
+          classifySTARI: exp.classifySTARI || {}
+        })
+      }
+    }
+
+    res.status(200).json({ 
+      success: true
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: '서버 내부 오류가 발생했습니다.' });
+  }
+});
+
 module.exports = router;

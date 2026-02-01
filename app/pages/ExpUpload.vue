@@ -105,6 +105,7 @@ const handleFileChange = async (event) => {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
     analysisResults.value = response.data;
+    console.log("PDF 분석 결과:", response.data);
   } catch (error) {
     console.error("PDF 분석 실패:", error);
     alert("파일 분석 중 오류가 발생했습니다.");
@@ -122,6 +123,11 @@ const handleExperienceSubmit = async (experienceList) => {
   try {
     const response = await axios.post('http://localhost:8000/analyze/json', experienceList);
     analysisResults.value = response.data;
+    if (!!analysisResults.value) {
+      const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+      const response = await axios.post("/api/insertExp", {email: userInfo?.email, data: analysisResults.value});
+      console.log(response);
+    }
   } catch (error) {
     console.error("복수 데이터 전송 실패:", error);
     alert("데이터 분석 중 오류가 발생했습니다.");
