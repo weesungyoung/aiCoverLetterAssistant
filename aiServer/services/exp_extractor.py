@@ -1,9 +1,14 @@
 import pdfplumber
 import io
-import os
-from dotenv import load_dotenv
 import openai
 import json
+from langchain_core.documents import Document
+from langchain_openai import OpenAIEmbeddings
+from langchain_community.vectorstores import Chroma
+
+import os
+from dotenv import load_dotenv
+
 
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -108,7 +113,7 @@ def process_experience(data, is_json=False):
 }
 
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model="gpt-5-nano-2025-08-07",
         messages=[{"role": "user", "content": prompt}],
         response_format=response_format
     )
@@ -117,3 +122,43 @@ def process_experience(data, is_json=False):
     result = json.loads(response.choices[0].message.content)
         
     return result
+
+
+def save_experiences_to_vector_db(userEmail, analysis_result, db_path="../my_chroma_db"):
+    experiences_list = analysis_result.get('experiences', [])
+    if not experiences_list:
+        print("저장할 경험 데이터가 없습니다.")
+        return None
+
+    documents = []
+    for exp in experiences_list:
+        stari = exp.get('classifySTARI', {})
+        keywords = exp.get('keywords', [])
+        keywords_text = ", ".join(keywords)
+        title = exp.get('title', '제목 없음')
+
+        page_content = f"""키워드: {keywords_text}
+상황(Situation): {stari.get('situation', '')}
+과제(Task): {stari.get('task', '')}
+행동(Action): {stari.get('action', '')}
+결과(Result): {stari.get('result', '')}
+통찰(Insight): {stari.get('insight', '')}"""
+
+        metadata = {
+            "userEmail" : userEmail,
+            "title": title,
+            "keywords": keywords_text,
+            "rawText": "".join([stari.get(k, '') for k in ['situation', 'task', 'action', 'result', 'insight']])
+        }
+        documents.append(Document(page_content=page_content, metadata=metadata))
+
+    # 한 번에 모든 문서를 DB에 저장
+    Chroma.from_documents(
+        documents=documents,
+        embedding=OpenAIEmbeddings(model="text-embedding-3-large"), # 오타 수정
+        persist_directory=db_path
+    )
+    
+    print(f"{len(documents)}개의 경험이 '{db_path}'에 성공적으로 저장되었습니다.")
+    print(page_content)
+    return 0

@@ -93,19 +93,24 @@ const handleFileChange = async (event) => {
   const file = event.target.files[0];
   if (!file) return;
 
+  const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+  const email = userInfo?.email || "";
   fileName.value = file.name;
   isLoading.value = true;
   analysisResults.value = null;
 
   const formData = new FormData();
   formData.append('file', file);
+  formData.append('userEmail', email);
 
   try {
     const response = await axios.post('http://localhost:8000/analyze/pdf', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
     analysisResults.value = response.data;
-    console.log("PDF 분석 결과:", response.data);
+    if (!!analysisResults.value) {
+      await axios.post("/api/insertExp", {email: email, data: analysisResults.value});
+    }
   } catch (error) {
     console.error("PDF 분석 실패:", error);
     alert("파일 분석 중 오류가 발생했습니다.");
@@ -121,12 +126,12 @@ const handleExperienceSubmit = async (experienceList) => {
   analysisResults.value = null;
 
   try {
-    const response = await axios.post('http://localhost:8000/analyze/json', experienceList);
+    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+    const email = userInfo?.email || "";
+    const response = await axios.post('http://localhost:8000/analyze/json', {userEmail: email, data: experienceList});
     analysisResults.value = response.data;
     if (!!analysisResults.value) {
-      const userInfo = JSON.parse(localStorage.getItem("userInfo"));
-      const response = await axios.post("/api/insertExp", {email: userInfo?.email, data: analysisResults.value});
-      console.log(response);
+      await axios.post("/api/insertExp", {email: email, data: analysisResults.value});
     }
   } catch (error) {
     console.error("복수 데이터 전송 실패:", error);
