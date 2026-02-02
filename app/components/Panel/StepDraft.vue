@@ -2,8 +2,8 @@
   <div class="panel-section">
     <div v-if="!activeQuestion.isStarted" class="start-guide-box">
       <div class="empty-state-icon">🎯</div>
-      <p class="guide-text" v-if="!isLoading">문항을 분석하고 소재를 골라<br>나만의 맞춤 초안을 만들어보세요!</p>
-      <p class="guide-text loading-text" v-else>문항을 분석하고 경험을 찾는 중입니다...</p>
+      <p class="guide-text" v-if="!isLoading">문항을 분석하고 경험을 골라<br>나만의 맞춤 초안을 만들어보세요!</p>
+      <p class="guide-text loading-text" v-else>문항 맞춤 경험을 찾는 중입니다...</p>
       <button class="start-analysis-btn" :disabled="isLoading" @click="handleStart">
         <span v-if="!isLoading">문항 분석 및 경험 선택하기</span>
         <span v-else class="loader"></span>
@@ -86,7 +86,7 @@
       </div>
 
       <div v-if="selectedMaterials.length > 0" class="action-footer">
-        <button class="generate-btn">
+        <button class="generate-btn" @click="startGeneration">
           <span>{{ selectedMaterials.length }}개의 소재로 초안 생성하기</span>
           <span class="arrow">→</span>
         </button>
@@ -99,14 +99,18 @@
 <script setup>
 import { ref } from 'vue';
 import axios from 'axios';
+import bus from '../../util/bus';
 
 const props = defineProps(['activeQuestion', 'userEmail', 'companyPerson', 'jdAnalysis', 'selectedMaterials']);
 const emit = defineEmits(['open-modal', 'update:selectedMaterials']);
 
-// 1. 백엔드에서 받아올 데이터를 담을 변수
+// 1. 데이터를 담을 변수
+const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+const email = userInfo?.email || "";
 const analysisGuide = ref(null);
 const recommendedMaterials = ref([]);
 const isLoading = ref(false);
+
 
 // 2. 분석 시작 및 API 호출 핸들러
 const handleStart = async () => {
@@ -114,7 +118,7 @@ const handleStart = async () => {
 
   // 가데이터
   const mockPayload = {
-    userEmail: props.userEmail || "pposongi@naver.com",
+    userEmail: email,
     question: props.activeQuestion?.title || "지원동기를 기술해주십시오.",
     company_person: props.companyPerson || "창의적이고 도전적인 인재상",
     jd_analysis: props.jdAnalysis || "프론트엔드 개발 및 UI/UX 최적화 담당"
@@ -160,6 +164,14 @@ const toggleMaterial = (title) => {
   }
   emit('update:selectedMaterials', updated)
 }
+
+// 자소서 초안 생성 버튼
+const startGeneration = () => {
+  const dummyDraft = "지원동기 초안입니다. 본인이 왜 이 포지션에 적합한지 구체적 사례를 통해 강조하겠습니다...";
+  // 에디터로 데이터 전송
+  bus.emit('generateDraft', dummyDraft);
+};
+
 </script>
 
 <style scoped>

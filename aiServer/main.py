@@ -74,3 +74,5 @@ async def analyze_and_recommend(request: CoverLetterRequest):
         "guide": guide_result,
         "recommendations": recommended_experiences
     }
+
+# 초안 생성 API
