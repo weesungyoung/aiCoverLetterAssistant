@@ -51,7 +51,7 @@ def generate_coverletter_guide(
         "q_intention": ["q_intention 후보 중 택 1~3"]
       }},
       "core_competency": "문항종류/문항의도/{question}/{company_person}/{jd_analysis}를 참고하여 드러나야 할 핵심 역량과 경험(1-2문장)",
-      "guideline": "문항종류/문항의도/{question}/{company_person}/{jd_analysis}를 참고하여 해당 문항에 포함되어야 할 내용과 기승전결에 대한 구체적인 가이드라인(3-4문장)"
+      "guideline": "문항종류/문항의도/{question}/{company_person}/{jd_analysis}를 참고하여 해당 문항에 포함되어야 할 내용과 기승전결에 대한 구체적인 가이드라인(3-4문장, -습니다. 로 작성)"
     }}
     
     [선택 후보군]:

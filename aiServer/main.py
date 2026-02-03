@@ -1,6 +1,7 @@
 from fastapi import FastAPI, UploadFile, File, Form, Body
 from services.exp_extractor import extract_text_from_pdf, process_experience, save_experiences_to_vector_db
-from services.question_analyzer import generate_coverletter_guide, exp_recommendation 
+from services.question_analyzer import generate_coverletter_guide, exp_recommendation
+from services.draft_creator import create_draft
 
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List
@@ -76,3 +77,27 @@ async def analyze_and_recommend(request: CoverLetterRequest):
     }
 
 # 초안 생성 API
+class DraftRequest(BaseModel):
+    question_type: str
+    user_exp: str
+    user_job: str
+    user_industry: str
+    core_competencies: str
+    company_info: str
+    company_news: str
+    reference_docs: str
+
+@app.post("/analyze/draft")
+async def generate_draft_endpoint(request: DraftRequest):
+
+    response = create_draft(
+        question_type=request.question_type,
+        user_exp=request.user_exp,
+        user_job=request.user_job,
+        user_industry=request.user_industry,
+        core_competencies=request.core_competencies,
+        company_info=request.company_info,
+        company_news=request.company_news
+    )
+    
+    return {"draft": response}

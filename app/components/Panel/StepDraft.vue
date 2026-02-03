@@ -86,9 +86,20 @@
       </div>
 
       <div v-if="selectedMaterials.length > 0" class="action-footer">
-        <button class="generate-btn" @click="startGeneration">
-          <span>{{ selectedMaterials.length }}개의 소재로 초안 생성하기</span>
-          <span class="arrow">→</span>
+        <button 
+          class="generate-btn" 
+          @click="startGeneration" 
+          :disabled="isGenerating"
+          :class="{ 'is-loading': isGenerating }"
+        >
+          <template v-if="isGenerating">
+            <span class="spinner"></span> <span>초안 생성 중입니다...</span>
+          </template>
+
+          <template v-else>
+            <span>{{ selectedMaterials.length }}개의 소재로 초안 생성하기</span>
+            <span class="arrow">→</span>
+          </template>
         </button>
       </div>
     </div>
@@ -121,7 +132,7 @@ const handleStart = async () => {
     userEmail: email,
     question: props.activeQuestion?.title || "지원동기를 기술해주십시오.",
     company_person: props.companyPerson || "창의적이고 도전적인 인재상",
-    jd_analysis: props.jdAnalysis || "프론트엔드 개발 및 UI/UX 최적화 담당"
+    jd_analysis: props.jdAnalysis || "백엔드 개발 및 UI/UX 최적화 담당"
   };
 
   try {
@@ -166,10 +177,49 @@ const toggleMaterial = (title) => {
 }
 
 // 자소서 초안 생성 버튼
-const startGeneration = () => {
-  const dummyDraft = "지원동기 초안입니다. 본인이 왜 이 포지션에 적합한지 구체적 사례를 통해 강조하겠습니다...";
-  // 에디터로 데이터 전송
-  bus.emit('generateDraft', dummyDraft);
+const isGenerating = ref(false); // 로딩 상태 변수
+const startGeneration = async () => {
+  
+  if (isGenerating.value) return;
+  isGenerating.value = true;
+  
+  try {
+    // 1. 서버로 보낼 데이터 준비 (실제 화면의 입력값들로 채워야 합니다)
+    const requestData = {
+      question_type: "지원동기", // 예시
+      user_exp: "2023년 OO 프로젝트에서 Python을 활용해 데이터 추출 시간을 30% 단축함",
+      user_job: "백엔드 개발자",
+      user_industry: "IT/플랫폼",
+      core_competencies: "기술적 전문성, 문제해결 능력",
+      company_info: "혁신적인 물류 솔루션을 제공하는 기업",
+      company_news: "최근 시리즈 C 투자 유치 및 글로벌 확장 중",
+      reference_docs: "" // 없으면 빈 문자열
+    };
+
+    // 2. FastAPI 서버에 POST 요청 보내기
+    const response = await fetch('http://localhost:8000/analyze/draft', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestData),
+    });
+
+    if (!response.ok) {
+      throw new Error('서버 응답에 실패했습니다.');
+    }
+
+    const result = await response.json();
+
+    // 3. 서버에서 받은 초안 데이터를 에디터로 전송
+    // result.draft인 이유는 FastAPI에서 return {"draft": response}로 보냈기 때문입니다.
+    bus.emit('generateDraft', result.draft);
+
+  } catch (error) {
+    console.error("초안 생성 중 오류 발생:", error);
+    alert("초안 생성에 실패했습니다. 다시 시도해 주세요.");
+  }
+  isGenerating.value = false;
 };
 
 </script>
@@ -397,4 +447,26 @@ const startGeneration = () => {
 .generate-btn:hover { background: #1e293b; transform: translateY(-1px); }
 .generate-btn .arrow { font-size: 18px; transition: transform 0.2s; }
 .generate-btn:hover .arrow { transform: translateX(4px); }
+
+.generate-btn:disabled {
+  background-color: #ccc; /* 회색으로 변경 */
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+/* 간단한 스피너 애니메이션 */
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
 </style>

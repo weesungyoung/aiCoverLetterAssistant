@@ -38,6 +38,9 @@
             </template>
           </span>
           <div class="question-actions">
+            <span class="char-count">
+              글자수: {{ activeQuestion.content.length }}자</span>
+            <span class="action-divider">|</span>
             <button class="action-btn" @click="toggleEditTitle">
               {{ isEditingTitle ? '완료' : '문항 수정' }}
             </button>
@@ -273,6 +276,11 @@ const openReport = () => {
 .question-title { font-size: 18px; font-weight: 700; color: #111; }
 .title-input { border: 1px solid #3b82f6; outline: none; padding: 4px 8px; border-radius: 4px; font-size: 16px; }
 .question-actions { color: #ccc; font-size: 13px; display: flex; gap: 8px; align-items: center; }
+.char-count {
+  color: #666; /* 글자수는 약간 더 진하게 표시하여 가독성 확보 */
+  font-weight: 500;
+  margin-right: 4px;
+}
 .action-btn { background: none; border: none; color: #999; cursor: pointer; font-size: 13px; }
 .action-btn:hover { color: #666; }
 
